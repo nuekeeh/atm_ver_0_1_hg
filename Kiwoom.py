@@ -101,6 +101,8 @@ class Kiwoom(QAxWidget):
             self._opw00001(rqname, trcode)
         elif rqname == "opw00018_req":
             self._opw00018(rqname, trcode)
+        elif rqname == "opt10001_req":
+            self._opt10001(rqname, trcode)
 
         try:
             self.tr_event_loop.exit()
@@ -137,6 +139,16 @@ class Kiwoom(QAxWidget):
     def _opw00001(self, rqname, trcode):
         d2_deposit = self._comm_get_data(trcode, "", rqname, 0, "d+2추정예수금")
         self.d2_deposit = Kiwoom.change_format(d2_deposit)
+
+    def _opt10001(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            code = self._comm_get_data(trcode, "", rqname, i, "종목코드")
+            name = self._comm_get_data(trcode, "", rqname, i, "종목명")
+            gyulsanwol = self._comm_get_data(trcode, "", rqname, i, "결산월")
+            aekmyunga = self._comm_get_data(trcode, "", rqname, i, "액면가")
+            jabongeum = self._comm_get_data(trcode, "", rqname, i, "자본금")
 
     def _opt10081(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
