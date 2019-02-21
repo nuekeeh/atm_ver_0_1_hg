@@ -75,15 +75,12 @@ class TR_Practice(QMainWindow):
 
         self.kiwoom.set_input_value("업종코드", business_code)
         self.kiwoom.set_input_value("기준일자", standard_date)
-
-        self.kiwoom.set_input_value("업종코드", "")
-        self.kiwoom.set_input_value("기준일자", "")
         self.kiwoom.comm_rq_data("opt20007_req", "opt20007", 0, "0202")
 
         while self.kiwoom.remained_data == True:
             time.sleep(TR_REQ_TIME_INTERVAL)
-            self.kiwoom.set_input_value("업종코드", "")
-            self.kiwoom.set_input_value("기준일자", "")
+            self.kiwoom.set_input_value("업종코드", business_code)
+            self.kiwoom.set_input_value("기준일자", standard_date)
             self.kiwoom.comm_rq_data("opt20007_req", "opt20007", 2, "0202")
 
         trp20007_df = pd.DataFrame(self.kiwoom.trp20007, columns = ["cur_price", "high_price", "low_price", "volume"], index = self.kiwoom.trp20007["date"])
