@@ -4,217 +4,149 @@ from PyQt5.QtCore import *
 from PyQt5 import uic
 from Kiwoom import *
 import time
+import pandas as pd
+import sqlite3
 
 #form_class = uic.loadUiType("pytrader.ui")[0]
 
 class TR_Practice(QMainWindow):
     def __init__(self):
         super().__init__()
-        #self.setupUi(self)
-
-        self.trade_stocks_done = False
 
         self.kiwoom = Kiwoom()
         self.kiwoom.comm_connect()
 
-        # self.timer = QTimer(self)
-        # self.timer.start(1000)
-        # self.timer.timeout.connect(self.timeout)
-        #
-        # self.timer2 = QTimer(self)
-        # self.timer2.start(1000 *10)
-        # self.timer2.timeout.connect(self.timeout2)
-        #
-        # accouns_num = int(self.kiwoom.get_login_info("ACCOUNT_CNT"))
-        # accounts = self.kiwoom.get_login_info("ACCNO")
-        #
-        # accounts_list = accounts.split(';')[0:accouns_num]
-        # self.comboBox.addItems(accounts_list)
-        #
-        # self.lineEdit.textChanged.connect(self.code_changed)
-        # self.pushButton.clicked.connect(self.send_order)
-        # self.pushButton_2.clicked.connect(self.check_balance)
-        #
-        # self.load_buy_sell_list()
+        self.kiwoom.ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
+        self.kiwoom.trp20002 = {'code': [], 'name': [], 'cur_price': [], 'volume': [], 'high_price': [], 'low_price': []}
+        self.kiwoom.trp20006 = {'date': [], 'cur_price': [], 'volume': []}
+        self.kiwoom.trp20007 = {'date': [], 'cur_price': [], 'high_price': [], 'low_price': [], 'volume': []}
+        self.kiwoom.trp50036 = {'date': [], 'yesterday_end_price': [], 'gift_historic_variability': []}
+        self.kiwoom.trp50037 = {'date': [], 'kospi_200_index': []}
 
-    # def trade_stocks(self):
-    #     hoga_lookup = {'지정가': "00", '시장가': "03"}
-    #
-    #     f = open("buy_list.txt", 'rt')
-    #     buy_list = f.readlines()
-    #     f.close()
-    #
-    #     f = open("sell_list.txt", 'rt')
-    #     sell_list = f.readlines()
-    #     f.close()
-    #
-    #     # account
-    #     account = self.comboBox.currentText()
-    #
-    #     # buy list
-    #     for row_data in buy_list:
-    #         split_row_data = row_data.split(';')
-    #         hoga = split_row_data[2]
-    #         code = split_row_data[1]
-    #         num = split_row_data[3]
-    #         price = split_row_data[4]
-    #
-    #         if split_row_data[-1].rstrip() == '매수전':
-    #             self.kiwoom.send_order("send_order_req", "0101", account, 1, code, num, price, hoga_lookup[hoga], "")
-    #
-    #     # sell list
-    #     for row_data in sell_list:
-    #         split_row_data = row_data.split(';')
-    #         hoga = split_row_data[2]
-    #         code = split_row_data[1]
-    #         num = split_row_data[3]
-    #         price = split_row_data[4]
-    #
-    #         if split_row_data[-1].rstrip() == '매도전':
-    #             self.kiwoom.send_order("send_order_req", "0101", account, 2, code, num, price, hoga_lookup[hoga], "")
-    #
-    #     # buy list
-    #     for i, row_data in enumerate(buy_list):
-    #         buy_list[i] = buy_list[i].replace("매수전", "주문완료")
-    #
-    #     # file update
-    #     f = open("buy_list.txt", 'wt')
-    #     for row_data in buy_list:
-    #         f.write(row_data)
-    #     f.close()
-    #
-    #     # sell list
-    #     for i, row_data in enumerate(sell_list):
-    #         sell_list[i] = sell_list[i].replace("매도전", "주문완료")
-    #
-    #     # file update
-    #     f = open("sell_list.txt", 'wt')
-    #     for row_data in sell_list:
-    #         f.write(row_data)
-    #     f.close()
-    #
-    # def load_buy_sell_list(self):
-    #     f = open("buy_list.txt", 'rt')
-    #     buy_list = f.readlines()
-    #     f.close()
-    #
-    #     f = open("sell_list.txt", 'rt')
-    #     sell_list = f.readlines()
-    #     f.close()
-    #
-    #     row_count = len(buy_list) + len(sell_list)
-    #     self.tableWidget_4.setRowCount(row_count)
-    #
-    #     # buy list
-    #     for j in range(len(buy_list)):
-    #         row_data = buy_list[j]
-    #         split_row_data = row_data.split(';')
-    #         split_row_data[1] = self.kiwoom.get_master_code_name(split_row_data[1].rsplit())
-    #
-    #         for i in range(len(split_row_data)):
-    #             item = QTableWidgetItem(split_row_data[i].rstrip())
-    #             item.setTextAlignment(Qt.AlignVCenter | Qt.AlignCenter)
-    #             self.tableWidget_4.setItem(j, i, item)
-    #
-    #     # sell list
-    #     for j in range(len(sell_list)):
-    #         row_data = sell_list[j]
-    #         split_row_data = row_data.split(';')
-    #         split_row_data[1] = self.kiwoom.get_master_code_name(split_row_data[1].rstrip())
-    #
-    #         for i in range(len(split_row_data)):
-    #             item = QTableWidgetItem(split_row_data[i].rstrip())
-    #             item.setTextAlignment(Qt.AlignVCenter | Qt.AlignCenter)
-    #             self.tableWidget_4.setItem(len(buy_list) + j, i, item)
-    #
-    #     self.tableWidget_4.resizeRowsToContents()
-    #
-    # def code_changed(self):
-    #     code = self.lineEdit.text()
-    #     name = self.kiwoom.get_master_code_name(code)
-    #     self.lineEdit_2.setText(name)
-    #
-    # def send_order(self):
-    #     order_type_lookup = {'신규매수': 1, '신규매도': 2, '매수취소': 3, '매도취소': 4}
-    #     hoga_lookup = {'지정가': "00", '시장가': "03"}
-    #
-    #     account = self.comboBox.currentText()
-    #     order_type = self.comboBox_2.currentText()
-    #     code = self.lineEdit.text()
-    #     hoga = self.comboBox_3.currentText()
-    #     num = self.spinBox.value()
-    #     price = self.spinBox_2.value()
-    #
-    #     self.kiwoom.send_order("send_order_req", "0101", account, order_type_lookup[order_type], code, num, price, hoga_lookup[hoga], "")
-    #
-    # def timeout(self):
-    #     market_start_time = QTime(9, 0, 0)
-    #     current_time = QTime.currentTime()
-    #
-    #     if current_time > market_start_time and self.trade_stocks_done is False:
-    #         self.trade_stocks()
-    #         self.trade_stocks_done = True
-    #
-    #     text_time = current_time.toString("hh:mm:ss")
-    #     time_msg = "현재시간: " + text_time
-    #
-    #     state = self.kiwoom.get_connect_state()
-    #     if state == 1:
-    #         state_msg = "서버 연결 중"
-    #     else:
-    #         state_msg = "서버 미 연결 중"
-    #
-    #     self.statusbar.showMessage(state_msg + " | " + time_msg)
-    #
-    # def timeout2(self):
-    #     if self.checkBox.isChecked():
-    #         self.check_balance()
-    #
-    # def check_balance(self):
-    #     self.kiwoom.reset_opw00018_output()
-    #     account_number = self.kiwoom.get_login_info("ACCNO")
-    #     account_number = account_number.split(';')[0]
-    #
-    #     self.kiwoom.set_input_value("계좌번호", account_number)
-    #     self.kiwoom.comm_rq_data("opw00018_req", "opw00018", 0, "2000")
-    #
-    #     while self.kiwoom.remained_data:
-    #         time.sleep(0.2)
-    #         self.kiwoom.set_input_value("계좌번호", account_number)
-    #         self.kiwoom.comm_rq_data("opw00018_req", "opw00018", 2, "2000")
-    #
-    #     # opw00001
-    #     self.kiwoom.set_input_value("계좌번호", account_number)
-    #     self.kiwoom.comm_rq_data("opw00001_req", "opw00001", 0, "2000")
-    #
-    #     # balance
-    #     item = QTableWidgetItem(self.kiwoom.d2_deposit)
-    #     item.setTextAlignment(Qt.AlignVCenter | Qt.AlignRight)
-    #     self.tableWidget.setItem(0, 0, item)
-    #
-    #     for i in range(1, 6):
-    #         item = QTableWidgetItem(self.kiwoom.opw00018_output['single'][i - 1])
-    #         item.setTextAlignment(Qt.AlignVCenter | Qt.AlignRight)
-    #         self.tableWidget.setItem(0, i, item)
-    #
-    #     self.tableWidget.resizeRowsToContents()
-    #
-    #     # Item list
-    #     item_count = len(self.kiwoom.opw00018_output['multi'])
-    #     self.tableWidget_2.setRowCount(item_count)
-    #
-    #     for j in range(item_count):
-    #         row = self.kiwoom.opw00018_output['multi'][j]
-    #         for i in range(len(row)):
-    #             item = QTableWidgetItem(row[i])
-    #             item.setTextAlignment(Qt.AlignVCenter | Qt.AlignRight)
-    #             self.tableWidget_2.setItem(j, i, item)
-    #
-    #     self.tableWidget_2.resizeRowsToContents()
+    def business_type_juga(self):
+        # market_gubun = input("market_gubun : ")
+        # business_code = input("business_code : ")
+
+        # self.kiwoom.set_input_value("시장구분", market_gubun)
+        # self.kiwoom.set_input_value("업종코드", business_code)
+
+        self.kiwoom.set_input_value("시장구분", "0")
+        self.kiwoom.set_input_value("업종코드", "001")
+        self.kiwoom.comm_rq_data("OPT20002_req", "OPT20002", 0, "0213")
+
+        while self.kiwoom.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            self.kiwoom.set_input_value("시장구분", "0")
+            self.kiwoom.set_input_value("업종코드", "001")
+            self.kiwoom.comm_rq_data("OPT20002_req", "OPT20002", 2, "0213")
+
+        trp20002_df = pd.DataFrame(self.kiwoom.trp20002, columns = ["code", "name", "cur_price", "volume", "high_price", "low_price"], index = self.kiwoom.trp20002["code"])
+        trp20002_df.to_csv('C:\\workplace\\atm_project\\tr20002.csv', encoding='ms949')
+        #print(trp20002_df)
+        return trp20002_df
+
+    def business_ilbong_load(self):
+        # market_gubun = input("market_gubun : ")
+        # business_code = input("business_code : ")
+
+        # self.kiwoom.set_input_value("시장구분", market_gubun)
+        # self.kiwoom.set_input_value("업종코드", business_code)
+
+        self.kiwoom.set_input_value("업종코드", "001")
+        self.kiwoom.set_input_value("기준일자", "20190218")
+        self.kiwoom.comm_rq_data("opt20006_req", "opt20006", 0, "0202")
+
+        while self.kiwoom.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            self.kiwoom.set_input_value("업종코드", "001")
+            self.kiwoom.set_input_value("기준일자", "20190218")
+            self.kiwoom.comm_rq_data("opt20006_req", "opt20006", 2, "0202")
+
+        trp20006_df = pd.DataFrame(self.kiwoom.trp20006, columns = ["cur_price", "volume"], index = self.kiwoom.trp20006["date"])
+        trp20006_df.to_csv('C:\\workplace\\atm_project\\tr20006.csv', encoding='ms949')
+        #print(trp20006_df)
+        return trp20006_df
+
+    def business_jubong_load(self):
+        business_code = input("business_code : ")
+        standard_date = input("standard_date : ")
+        #스트링 변환 넣어주기
+        #상동 *2
+
+        self.kiwoom.set_input_value("업종코드", business_code)
+        self.kiwoom.set_input_value("기준일자", standard_date)
+
+        self.kiwoom.set_input_value("업종코드", "")
+        self.kiwoom.set_input_value("기준일자", "")
+        self.kiwoom.comm_rq_data("opt20007_req", "opt20007", 0, "0202")
+
+        while self.kiwoom.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            self.kiwoom.set_input_value("업종코드", "")
+            self.kiwoom.set_input_value("기준일자", "")
+            self.kiwoom.comm_rq_data("opt20007_req", "opt20007", 2, "0202")
+
+        trp20007_df = pd.DataFrame(self.kiwoom.trp20007, columns = ["cur_price", "high_price", "low_price", "volume"], index = self.kiwoom.trp20007["date"])
+        trp20007_df.to_csv('C:\\workplace\\atm_project\\tr20007.csv', encoding='ms949')
+        print(trp20007_df)
+        return trp20007_df
+
+    def major_index_variability_chart(self):
+        # event_code = input("event_code : ")
+        # standard_date = input("standard_date : ")
+        # period = input("period : ")
+        # chart_gubun = input("chart_gubun : ")
+        event_code = '_JP#NI225'
+        standard_date = '20190220'
+        period = 2
+        chart_gubun = 0
+
+        self.kiwoom.set_input_value("종목코드", str(event_code))
+        self.kiwoom.set_input_value("기준일자", str(standard_date))
+        self.kiwoom.set_input_value("기간", period)
+        self.kiwoom.set_input_value("차트구분", chart_gubun)
+        self.kiwoom.comm_rq_data("opt_50036_req", "OPT50036", 0, "0733")
+
+        while self.kiwoom.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            self.kiwoom.set_input_value("종목코드", str(event_code))
+            self.kiwoom.set_input_value("기준일자", str(standard_date))
+            self.kiwoom.set_input_value("기간", period)
+            self.kiwoom.set_input_value("차트구분", chart_gubun)
+            self.kiwoom.comm_rq_data("OPT50036_req", "OPT50036", 2, "0733")
+
+        trp50036_df = pd.DataFrame(self.kiwoom.trp50036, columns = ["date", "yesterday_end_price", "gift_historic_variability"], index = self.kiwoom.trp50036["date"])
+        trp50036_df.to_csv('C:\\workplace\\atm_project\\tr50036.csv', encoding='ms949')
+        print(trp50036_df)
+        return trp50036_df
+
+    def kospi200_index_load(self):
+        event_code = input("event_code : ")
+        standard_date = input("standard_date : ")
+        event_code = str(event_code)
+        standard_date = str(standard_date)
+
+        self.kiwoom.set_input_value("종목코드", event_code)
+        self.kiwoom.set_input_value("기준일자", standard_date)
+        self.kiwoom.comm_rq_data("opt50037_req", "opt50037", 0, "0202")
+
+        while self.kiwoom.remained_data == True:
+            time.sleep(TR_REQ_TIME_INTERVAL)
+            self.kiwoom.set_input_value("업종코드", "")
+            self.kiwoom.set_input_value("기준일자", "")
+            self.kiwoom.comm_rq_data("opt20007_req", "opt20007", 2, "0202")
+
+        trp20007_df = pd.DataFrame(self.kiwoom.trp20007, columns = ["cur_price", "high_price", "low_price", "volume"], index = self.kiwoom.trp20007["date"])
+        trp20007_df.to_csv('C:\\workplace\\atm_project\\tr20007.csv', encoding='ms949')
+        print(trp20007_df)
+        return trp20007_df
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     trp = TR_Practice()
-    #myWindow.show()
-    print('end prog')
+    #trp.business_type_juga()
+    #trp.business_ilbong_load()
+    #trp.business_jubong_load()
+    #trp.major_index_variability_chart()
+    trp.kospi200_index_load()
     app.exec_()

@@ -101,8 +101,16 @@ class Kiwoom(QAxWidget):
             self._opw00001(rqname, trcode)
         elif rqname == "opw00018_req":
             self._opw00018(rqname, trcode)
-        elif rqname == "opt10001_req":
-            self._opt10001(rqname, trcode)
+        elif rqname == "OPT20002_req":
+            self._OPT20002(rqname, trcode)
+        elif rqname == "opt20006_req":
+            self._opt20006(rqname, trcode)
+        elif rqname == "opt20007_req":
+            self._opt20007(rqname, trcode)
+        elif rqname == "opt_50036_req":
+            self._opt50036(rqname, trcode)
+        elif rqname == "opt50037_req":
+            self._opt50037(rqname, trcode)
 
         try:
             self.tr_event_loop.exit()
@@ -140,16 +148,6 @@ class Kiwoom(QAxWidget):
         d2_deposit = self._comm_get_data(trcode, "", rqname, 0, "d+2추정예수금")
         self.d2_deposit = Kiwoom.change_format(d2_deposit)
 
-    def _opt10001(self, rqname, trcode):
-        data_cnt = self._get_repeat_cnt(trcode, rqname)
-
-        for i in range(data_cnt):
-            code = self._comm_get_data(trcode, "", rqname, i, "종목코드")
-            name = self._comm_get_data(trcode, "", rqname, i, "종목명")
-            gyulsanwol = self._comm_get_data(trcode, "", rqname, i, "결산월")
-            aekmyunga = self._comm_get_data(trcode, "", rqname, i, "액면가")
-            jabongeum = self._comm_get_data(trcode, "", rqname, i, "자본금")
-
     def _opt10081(self, rqname, trcode):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
 
@@ -159,14 +157,13 @@ class Kiwoom(QAxWidget):
             high = self._comm_get_data(trcode, "", rqname, i, "고가")
             low = self._comm_get_data(trcode, "", rqname, i, "저가")
             close = self._comm_get_data(trcode, "", rqname, i, "현재가")
-            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+
 
             self.ohlcv['date'].append(date)
             self.ohlcv['open'].append(int(open))
             self.ohlcv['high'].append(int(high))
             self.ohlcv['low'].append(int(low))
             self.ohlcv['close'].append(int(close))
-            self.ohlcv['volume'].append(int(volume))
 
     def reset_opw00018_output(self):
         self.opw00018_output = {'single': [], 'multi': []}
@@ -211,6 +208,74 @@ class Kiwoom(QAxWidget):
 
             self.opw00018_output['multi'].append([name, quantity, purchase_price, current_price, eval_profit_loss_price,
                                                   earning_rate])
+
+    def _OPT20002(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            code = self._comm_get_data(trcode, "", rqname, i, "종목코드")
+            name = self._comm_get_data(trcode, "", rqname, i, "종목명")
+            cur_price = self._comm_get_data(trcode, "", rqname, i, "현재가")
+            volume = self._comm_get_data(trcode, "", rqname, i, "현재거래량")
+            high_price = self._comm_get_data(trcode, "", rqname, i, "고가")
+            low_price = self._comm_get_data(trcode, "", rqname, i, "저가")
+
+            self.trp20002['code'].append(code)
+            self.trp20002['name'].append(name)
+            self.trp20002['cur_price'].append(int(cur_price))
+            self.trp20002['volume'].append(int(volume))
+            self.trp20002['high_price'].append(int(high_price))
+            self.trp20002['low_price'].append(int(low_price))
+
+    def _opt20006(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            date = self._comm_get_data(trcode, "", rqname, i, "일자")
+            cur_price = self._comm_get_data(trcode, "", rqname, i, "현재가")
+            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+
+            self.trp20006['date'].append(date)
+            self.trp20006['cur_price'].append(int(cur_price))
+            self.trp20006['volume'].append(int(volume))
+
+    def _opt20007(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            date = self._comm_get_data(trcode, "", rqname, i, "일자")
+            cur_price = self._comm_get_data(trcode, "", rqname, i, "현재가")
+            high_price = self._comm_get_data(trcode, "", rqname, i, "고가")
+            low_price = self._comm_get_data(trcode, "", rqname, i, "저가")
+            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+
+            self.trp20007['date'].append(date)
+            self.trp20007['cur_price'].append(int(cur_price))
+            self.trp20007['high_price'].append(int(high_price))
+            self.trp20007['low_price'].append(int(low_price))
+            self.trp20007['volume'].append(int(volume))
+
+    def _opt50036(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            date = self._comm_get_data(trcode, "", rqname, i, "일자")
+            yesterday_end_price = self._comm_get_data(trcode, "", rqname, i, "전일종가")
+            gift_historic_variability = self._comm_get_data(trcode, "", rqname, i, "선물역사적변동성")
+
+            self.trp50036['date'].append(date)
+            self.trp50036['yesterday_end_price'].append(yesterday_end_price)
+            self.trp50036['gift_historic_variability'].append(gift_historic_variability)
+
+    def _opt50037(self, rqname, trcode):
+        data_cnt = self._get_repeat_cnt(trcode, rqname)
+
+        for i in range(data_cnt):
+            date = self._comm_get_data(trcode, "", rqname, i, "일자")
+            kospi_200_index = self._comm_get_data(trcode, "", rqname, i, "코스피200")
+
+            self.trp50037['date'].append(date)
+            self.trp50037['kospi_200_index'].append(int(kospi_200_index))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
