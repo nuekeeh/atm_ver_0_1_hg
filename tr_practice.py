@@ -125,25 +125,25 @@ class TR_Practice(QMainWindow):
 
         self.kiwoom.set_input_value("종목코드", event_code)
         self.kiwoom.set_input_value("기준일자", standard_date)
-        self.kiwoom.comm_rq_data("opt50037_req", "opt50037", 0, "0202")
+        self.kiwoom.comm_rq_data("opt50037_req", "opt50037", 0, "0221")
 
         while self.kiwoom.remained_data == True:
             time.sleep(TR_REQ_TIME_INTERVAL)
-            self.kiwoom.set_input_value("업종코드", "")
-            self.kiwoom.set_input_value("기준일자", "")
-            self.kiwoom.comm_rq_data("opt20007_req", "opt20007", 2, "0202")
+            self.kiwoom.set_input_value("종목코드", event_code)
+            self.kiwoom.set_input_value("기준일자", standard_date)
+            self.kiwoom.comm_rq_data("opt50037_req", "opt50037", 2, "0221")
 
-        trp20007_df = pd.DataFrame(self.kiwoom.trp20007, columns = ["cur_price", "high_price", "low_price", "volume"], index = self.kiwoom.trp20007["date"])
-        trp20007_df.to_csv('C:\\workplace\\atm_project\\tr20007.csv', encoding='ms949')
-        print(trp20007_df)
-        return trp20007_df
+        trp50037_df = pd.DataFrame(self.kiwoom.trp50037, columns = ["kospi_200_index"], index = self.kiwoom.trp50037["date"])
+        trp50037_df.to_csv('C:\\workplace\\atm_project\\tr50037.csv', encoding='ms949')
+        print(trp50037_df)
+        return trp50037_df
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     trp = TR_Practice()
     #trp.business_type_juga()
     #trp.business_ilbong_load()
-    #trp.business_jubong_load()
+    # trp.business_jubong_load()
     #trp.major_index_variability_chart()
     trp.kospi200_index_load()
     app.exec_()
